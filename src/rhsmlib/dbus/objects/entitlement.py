@@ -98,6 +98,10 @@ class EntitlementDBusObject(base_object.BaseObject):
         if on_date != "":
             options['on_date'] = self._parse_date(on_date)
 
+        after = options.setdefault("after", "")
+        if after != "":
+            options["after"] = self._parse_date(after)
+
         cp = self.build_uep(proxy_options, proxy_only=True)
         entitlement_service = EntitlementService(cp)
         pools = entitlement_service.get_pools(**options)
