@@ -278,7 +278,7 @@ client.registerSystem = subscriptionDetails => {
                     );
                 }
                 else {
-                    return registerService.call(
+                    let result = registerService.call(
                         'Register',
                         [
                             subscriptionDetails.org,
@@ -289,6 +289,8 @@ client.registerSystem = subscriptionDetails => {
                             userLang
                         ]
                     );
+                    registered = true;
+                    return result;
                 }
             })
             .catch(error => {
