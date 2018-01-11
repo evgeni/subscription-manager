@@ -209,7 +209,7 @@ client.registerSystem = subscriptionDetails => {
             const match = pattern.exec(subscriptionDetails.proxy_server);
             const ipv6Address = match[1];
             const address = match[2];
-            const port = match[3];
+            let port = match[3];
             if (ipv6Address && address) {
                 throw 'malformed proxy url; ipv6 address syntax and hostname are mutually exclusive';
             }
@@ -224,6 +224,9 @@ client.registerSystem = subscriptionDetails => {
                     t: 's',
                     v: address,
                 };
+            }
+            if (!port) {
+                port = '3128'; // FIXME use case for config defaults service
             }
             if (port) {
                 connection_options.proxy_port = {
@@ -266,7 +269,7 @@ client.registerSystem = subscriptionDetails => {
                     '/com/redhat/RHSM1/Register'
                 );
                 if (subscriptionDetails.activationKeys) {
-                    return registerService.call(
+                    let result = registerService.call(
                         'RegisterWithActivationKeys',
                         [
                             subscriptionDetails.org,
@@ -276,6 +279,8 @@ client.registerSystem = subscriptionDetails => {
                             userLang
                         ]
                     );
+                    registered = true;
+                    return result;
                 }
                 else {
                     let result = registerService.call(
@@ -307,7 +312,7 @@ client.registerSystem = subscriptionDetails => {
                 dfd.reject(parseErrorMessage(error));
             })
             .then(() => {
-                if (registered === true) {
+                if (registered) {
                     // Dictionary (key: client.config / rhsm.conf options, value are
                     // attributes of connection_options) ... ('handler' and 'host' are different)
                     // Note: only options from [server] section are supported
